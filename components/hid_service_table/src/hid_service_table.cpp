@@ -1,6 +1,6 @@
 #include "hid_service_table.hpp"
 
-static espp::Logger logger({.tag = "GFPS BLE", .level = espp::Logger::Verbosity::DEBUG});
+static espp::Logger logger({.tag = "HID BLE", .level = espp::Logger::Verbosity::DEBUG});
 
 // READ = only val
 // READ/WRITE = val + cfg
@@ -8,23 +8,28 @@ static espp::Logger logger({.tag = "GFPS BLE", .level = espp::Logger::Verbosity:
 /* Attributes State Machine */
 enum
   {
-    /// HID Service
-    IDX_SVC_HID, // HID Service, UUID: 0x1812
+    // HID Service, UUID: 0x1812
+    IDX_SVC_HID,
 
-    IDX_CHAR_HID_INFO, // HID Information characteristic, UUID: 0x2A4A, Properties: read
+    // HID Information characteristic, UUID: 0x2A4A, Properties: read
+    IDX_CHAR_HID_INFO,
     IDX_CHAR_VAL_HID_INFO,
 
-    IDX_CHAR_HID_CONTROL_POINT, // HID Control Point characteristic, UUID: 0x2A4C, Properties: write without response
+    // HID Control Point characteristic, UUID: 0x2A4C, Properties: write without response
+    IDX_CHAR_HID_CONTROL_POINT,
     IDX_CHAR_VAL_HID_CONTROL_POINT,
     IDX_CHAR_CFG_HID_CONTROL_POINT,
 
-    IDX_CHAR_HID_REPORT_MAP, // HID Report Map characteristic, UUID: 0x2A4B, Properties: read
+    // HID Report Map characteristic, UUID: 0x2A4B, Properties: read
+    IDX_CHAR_HID_REPORT_MAP,
     IDX_CHAR_VAL_HID_REPORT_MAP,
 
-    IDX_CHAR_HID_REPORT, // HID Report characteristic, UUID: 0x2A4D, Properties: read, notify
+    // HID Report characteristic, UUID: 0x2A4D, Properties: read, notify
+    IDX_CHAR_HID_REPORT,
     IDX_CHAR_VAL_HID_REPORT,
 
-    IDX_CHAR_HID_PROTOCOL_MODE, // HID Protocol Mode characteristic, UUID: 0x2A4E, Properties: read, write without response
+    // HID Protocol Mode characteristic, UUID: 0x2A4E, Properties: read, write without response
+    IDX_CHAR_HID_PROTOCOL_MODE,
     IDX_CHAR_VAL_HID_PROTOCOL_MODE,
     IDX_CHAR_CFG_HID_PROTOCOL_MODE,
 
@@ -41,11 +46,11 @@ enum
 // in reverse order, and 2) the rest of their full 128-bit UUIDs are the standard
 // Bluetooth SIG base UUID (0x0000XXXX-0000-1000-8000-00805F9B34FB), and the 16-bit
 // UUIDs are the last 2 bytes of the first 4 bytes of the full UUIDs (XXXX).
-static const uint16_t GATTS_SERVICE_UUID_HID      = 0x1812;
-static const uint16_t GATTS_CHAR_UUID_HID_INFO    = 0x2A4A;
+static const uint16_t GATTS_SERVICE_UUID_HID            = 0x1812;
+static const uint16_t GATTS_CHAR_UUID_HID_INFO          = 0x2A4A;
 static const uint16_t GATTS_CHAR_UUID_HID_CONTROL_POINT = 0x2A4C;
-static const uint16_t GATTS_CHAR_UUID_HID_REPORT_MAP = 0x2A4B;
-static const uint16_t GATTS_CHAR_UUID_HID_REPORT  = 0x2A4D;
+static const uint16_t GATTS_CHAR_UUID_HID_REPORT_MAP    = 0x2A4B;
+static const uint16_t GATTS_CHAR_UUID_HID_REPORT        = 0x2A4D;
 static const uint16_t GATTS_CHAR_UUID_HID_PROTOCOL_MODE = 0x2A4E;
 
 /* The max length of characteristic value. When the GATT client performs a write or prepare write operation,
@@ -162,61 +167,47 @@ static const esp_gatts_attr_db_t gatt_db[IDX_HID_NB] =
     [IDX_CHAR_HID_INFO]     =
     {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&character_declaration_uuid, ESP_GATT_PERM_READ,
                            CHAR_DECLARATION_SIZE, CHAR_DECLARATION_SIZE, (uint8_t *)&char_prop_read}},
-
-    /* Characteristic Value */
     [IDX_CHAR_VAL_HID_INFO] =
-    {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)GATTS_CHAR_UUID_HID_INFO, ESP_GATT_PERM_READ,
+    {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&GATTS_CHAR_UUID_HID_INFO, ESP_GATT_PERM_READ,
                            GATTS_DEMO_CHAR_VAL_LEN_MAX, sizeof(char_value), (uint8_t *)char_value}},
 
     /* Characteristic Declaration */
     [IDX_CHAR_HID_CONTROL_POINT]      =
     {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&character_declaration_uuid, ESP_GATT_PERM_READ,
                            CHAR_DECLARATION_SIZE, CHAR_DECLARATION_SIZE, (uint8_t *)&char_prop_read_write_notify}},
-
-    /* Characteristic Value */
     [IDX_CHAR_VAL_HID_CONTROL_POINT]  =
-    {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)GATTS_CHAR_UUID_HID_CONTROL_POINT, ESP_GATT_PERM_WRITE,
+    {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&GATTS_CHAR_UUID_HID_CONTROL_POINT, ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE,
                            GATTS_DEMO_CHAR_VAL_LEN_MAX, sizeof(char_value), (uint8_t *)char_value}},
-
-    /* Client Characteristic Configuration Descriptor */
     [IDX_CHAR_CFG_HID_CONTROL_POINT]  =
-    {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&character_client_config_uuid, ESP_GATT_PERM_WRITE,
-                           sizeof(uint16_t), sizeof(char_value), (uint8_t *)char_value}},
+    {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&character_client_config_uuid, ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE,
+                           sizeof(uint16_t), sizeof(ccc), (uint8_t *)ccc}},
 
     /* Characteristic Declaration */
     [IDX_CHAR_HID_REPORT_MAP]      =
     {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&character_declaration_uuid, ESP_GATT_PERM_READ,
-                           CHAR_DECLARATION_SIZE, CHAR_DECLARATION_SIZE, (uint8_t *)&char_prop_read_write_notify}},
-
-    /* Characteristic Value */
+                           CHAR_DECLARATION_SIZE, CHAR_DECLARATION_SIZE, (uint8_t *)&char_prop_read}},
     [IDX_CHAR_VAL_HID_REPORT_MAP]  =
-    {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)GATTS_CHAR_UUID_HID_REPORT_MAP, ESP_GATT_PERM_READ,
+    {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&GATTS_CHAR_UUID_HID_REPORT_MAP, ESP_GATT_PERM_READ,
                            GATTS_DEMO_CHAR_VAL_LEN_MAX, sizeof(char_value), (uint8_t *)char_value}},
 
     /* Characteristic Declaration */
     [IDX_CHAR_HID_REPORT]      =
-    {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&character_declaration_uuid, ESP_GATT_PERM_WRITE,
-                           CHAR_DECLARATION_SIZE, CHAR_DECLARATION_SIZE, (uint8_t *)&char_prop_write}},
-
-    /* Characteristic Value */
+    {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&character_declaration_uuid, ESP_GATT_PERM_READ,
+                           CHAR_DECLARATION_SIZE, CHAR_DECLARATION_SIZE, (uint8_t *)&char_prop_read}},
     [IDX_CHAR_VAL_HID_REPORT]  =
-    {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)GATTS_CHAR_UUID_HID_REPORT, ESP_GATT_PERM_READ,
+    {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&GATTS_CHAR_UUID_HID_REPORT, ESP_GATT_PERM_READ,
                            GATTS_DEMO_CHAR_VAL_LEN_MAX, sizeof(char_value), (uint8_t *)char_value}},
 
     /* Characteristic Declaration */
     [IDX_CHAR_HID_PROTOCOL_MODE]      =
     {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&character_declaration_uuid, ESP_GATT_PERM_READ,
-                           CHAR_DECLARATION_SIZE, CHAR_DECLARATION_SIZE, (uint8_t *)&char_prop_read}},
-
-    /* Characteristic Value */
+                           CHAR_DECLARATION_SIZE, CHAR_DECLARATION_SIZE, (uint8_t *)&char_prop_read_write_notify}},
     [IDX_CHAR_VAL_HID_PROTOCOL_MODE]  =
-    {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&GATTS_CHAR_UUID_HID_PROTOCOL_MODE, ESP_GATT_PERM_READ,
+    {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&GATTS_CHAR_UUID_HID_PROTOCOL_MODE, ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE,
                            GATTS_DEMO_CHAR_VAL_LEN_MAX, sizeof(char_value), (uint8_t *)char_value}},
-
-    /* Client Characteristic Configuration Descriptor */
     [IDX_CHAR_CFG_HID_PROTOCOL_MODE]  =
     {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&character_client_config_uuid, ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE,
-                           sizeof(uint16_t), sizeof(char_value), (uint8_t *)char_value}},
+                           sizeof(uint16_t), sizeof(ccc), (uint8_t *)ccc}},
 
   };
 
@@ -390,24 +381,28 @@ static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param
      * ADVERTISEMENT
      * */
   case ESP_GAP_BLE_ADV_DATA_RAW_SET_COMPLETE_EVT:
+    logger.info("BLE GAP ADV_DATA_RAW_SET_COMPLETE");
     adv_config_done &= (~ADV_CONFIG_FLAG);
     if (adv_config_done == 0){
       esp_ble_gap_start_advertising(&adv_params);
     }
     break;
   case ESP_GAP_BLE_ADV_DATA_SET_COMPLETE_EVT:
+    logger.info("BLE GAP ADV_DATA_SET_COMPLETE");
     adv_config_done &= (~ADV_CONFIG_FLAG);
     if (adv_config_done == 0){
       esp_ble_gap_start_advertising(&adv_params);
     }
     break;
   case ESP_GAP_BLE_SCAN_RSP_DATA_RAW_SET_COMPLETE_EVT:
+    logger.info("BLE GAP SCAN_RSP_DATA_RAW_SET_COMPLETE");
     adv_config_done &= (~SCAN_RSP_CONFIG_FLAG);
     if (adv_config_done == 0){
       esp_ble_gap_start_advertising(&adv_params);
     }
     break;
   case ESP_GAP_BLE_SCAN_RSP_DATA_SET_COMPLETE_EVT:
+    logger.info("BLE GAP SCAN_RSP_DATA_SET_COMPLETE");
     adv_config_done &= (~SCAN_RSP_CONFIG_FLAG);
     if (adv_config_done == 0){
       esp_ble_gap_start_advertising(&adv_params);
@@ -562,7 +557,8 @@ static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_
     logger.info("ESP_GATTS_REG_EVT");
     // TODO: set name here to what the user wants....
     esp_ble_gap_set_device_name(CONFIG_DEVICE_NAME);
-
+    esp_ble_gap_config_adv_data(&adv_config);
+    esp_ble_gap_config_adv_data(&scan_rsp_config);
     esp_ble_gatts_create_attr_tab(gatt_db, gatts_if, IDX_HID_NB, SVC_INST_ID);
     break;
   case ESP_GATTS_READ_EVT:

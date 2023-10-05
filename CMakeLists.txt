@@ -12,13 +12,11 @@ set(EXTRA_COMPONENT_DIRS
 
 set(
   COMPONENTS
-  # TODO: add additional esp-idf and espp components you want to use to the line below:
-  "main esptool_py logger task"
+  "main esptool_py logger task hid_service_table"
   CACHE STRING
   "List of components to include"
   )
 
-# TODO: update this with your project's name
-project(template)
+project(esp_hid_service_table)
 
 set(CMAKE_CXX_STANDARD 20)

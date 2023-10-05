@@ -1,4 +1,4 @@
-menu "Configuration"
+menu "HID Service Table Example Configuration"
 
     config DEVICE_NAME
         string "BLE Device Name"

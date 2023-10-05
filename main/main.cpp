@@ -19,6 +19,56 @@ extern "C" void app_main(void) {
 
   logger.info("Bootup");
 
+  // Initialize NVS.
+  auto ret = nvs_flash_init();
+  if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+    ESP_ERROR_CHECK(nvs_flash_erase());
+    ret = nvs_flash_init();
+  }
+  ESP_ERROR_CHECK( ret );
+
+  logger.info("Device name: '{}'", CONFIG_DEVICE_NAME);
+
+  #if CONFIG_BT_CLASSIC_ENABLED
+  esp_bt_mode_t mode = ESP_BT_MODE_BTDM;
+  logger.info("BT mode");
+  #else
+  esp_bt_mode_t mode = ESP_BT_MODE_BLE;
+  logger.info("BLE mode");
+  #endif
+
+  // Initialize the bluetooth subsystem
+  ret = esp_bt_controller_mem_release(ESP_BT_MODE_CLASSIC_BT);
+  if (ret) {
+    logger.error("esp_bt_controller_mem_release failed: {}", ret);
+    return;
+  }
+
+  esp_bt_controller_config_t bt_cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
+  ret = esp_bt_controller_init(&bt_cfg);
+  if (ret) {
+    logger.error("enable controller failed");
+    return;
+  }
+
+  ret = esp_bt_controller_enable(ESP_BT_MODE_BLE);
+  if (ret) {
+    logger.error("enable controller failed");
+    return;
+  }
+
+  logger.info("init bluetooth");
+  ret = esp_bluedroid_init();
+  if (ret) {
+    logger.error("init bluetooth failed");
+    return;
+  }
+  ret = esp_bluedroid_enable();
+  if (ret) {
+    logger.error("enable bluetooth failed");
+    return;
+  }
+
   hid_service_table_init();
 
   // make a simple task that prints "Hello World!" every second

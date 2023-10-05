@@ -1,6 +1,8 @@
 #include <chrono>
 #include <thread>
 
+#include "hid_service_table.hpp"
+
 #include "logger.hpp"
 #include "task.hpp"
 
@@ -17,6 +19,8 @@ extern "C" void app_main(void) {
 
   logger.info("Bootup");
 
+  hid_service_table_init();
+
   // make a simple task that prints "Hello World!" every second
   espp::Task task({
       .name = "Hello World",
@@ -31,9 +35,8 @@ extern "C" void app_main(void) {
     });
   task.start();
 
-  // also print in the main thread
+  // loop forever
   while (true) {
-    logger.debug("[{:.3f}] Hello World!", elapsed());
     std::this_thread::sleep_for(1s);
   }
 }

@@ -78,24 +78,28 @@ extern "C" void app_main(void) {
             static xb::InputReport report;
             static constexpr size_t report_size = sizeof(xb::InputReport);
             static uint8_t report_data[report_size];
-            static uint8_t battery_level = 0;
-            // toggle the up/down on the left joystick (axis_y, center is 32768, up is 65535, down is 0)
-            if (report.axis_y == 0) {
-              report.axis_y = 65534;
-            } else if (report.axis_y == 65534) {
-              report.axis_y = 0;
-            } else if (report.axis_y == 32767) {
-              report.axis_y = 0;
-            } else {
-              report.axis_y = 32767;
-            }
-            // toggle the 'b' button
+            static constexpr uint16_t AXIS_UP_VALUE = 65534;
+            static constexpr uint16_t AXIS_DOWN_VALUE = 0;
+            static constexpr uint16_t AXIS_CENTER_VALUE = 32767;
+            static bool go_up = true;
+            // toggle the 'b' button, which acts as the 'back' button on Android
             // report.btn_2 = !report.btn_2; // NOTE: disabling this because it's really annoying...
-            // copy the report into the report data
-            memcpy(report_data, &report, report_size);
-            // send an input report
-            hid_service_send_input_report(report_data, report_size);
+            // toggle the up/down on the left joystick (axis_y, center is 32768, up is 65535, down is 0)
+            if (go_up) {
+              report.axis_y = AXIS_UP_VALUE;
+              hid_service_send_input_report((const uint8_t*)&report, report_size);
+
+            } else {
+              report.axis_y = AXIS_DOWN_VALUE;
+              hid_service_send_input_report((const uint8_t*)&report, report_size);
+            }
+            // put it back to center
+            report.axis_y = AXIS_CENTER_VALUE;
+            hid_service_send_input_report((const uint8_t*)&report, report_size);
+            // toggle the direction
+            go_up = !go_up;
             // update the battery level
+            static uint8_t battery_level = 0;
             battery_level = (battery_level) % 100 + 5;
             hid_service_set_battery_level(battery_level);
           }

@@ -1,6 +1,25 @@
 # ESP HID Service Table
 
-Example providing HID over GATT (HoG) profile for BLE on ESP using the ESP-IDF GATT Service Table APIs.
+Example providing HID over GATT (HoG) profile for BLE on ESP using the ESP-IDF
+GATT Service Table APIs.
+
+## Implementation
+
+The way this example works is to create the following service tables in order:
+
+- Battery Service (0x180F)
+- Device Information Service (0x180A)
+- HID Service (0x1812)
+
+The HID service is the last service created in the table, and uses the
+`include_service_uuid` (0x2802) attribute to include the Battery and Device
+Information services in the HID service.
+
+This example was based on the ESP-IDF [ble_hid_device_demo
+example](https://github.com/espressif/esp-idf/tree/master/examples/bluetooth/bluedroid/ble/ble_hid_device_demo),
+which performs a similar function for a mouse/keyboard input device also using
+the GATT Service Table APIs (see
+[hid_device_le_prf.c](https://github.com/espressif/esp-idf/blob/master/examples/bluetooth/bluedroid/ble/ble_hid_device_demo/main/hid_device_le_prf.c))
 
 ## Cloning
 

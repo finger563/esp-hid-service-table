@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <chrono>
 
 #include <esp_bt.h>
@@ -21,4 +22,7 @@
 #include "task.hpp"
 #include "timer.hpp"
 
+bool hid_service_table_is_connected();
 void hid_service_table_init();
+void hid_service_table_set_report_descriptor(const uint8_t* report_descriptor, size_t report_descriptor_len);
+void hid_service_table_send_input_report(const uint8_t* report, size_t report_len);

@@ -6,4 +6,10 @@ menu "HID Service Table Example Configuration"
         help
             Set the BLE device name used in advertisement of the BLE device.
 
+    config MANUFACTURER_NAME
+        string "BLE Manufacturer Name"
+        default "Microsoft Corporation"
+        help
+            Set the BLE device manufacturer name used in advertisement of the BLE device.
+
 endmenu

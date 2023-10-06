@@ -23,3 +23,4 @@ enum
 
 extern uint8_t battery_level;
 extern const esp_gatts_attr_db_t bas_att_db[BAS_IDX_NB];
+extern uint16_t bas_handle_table[BAS_IDX_NB];

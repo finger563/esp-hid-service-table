@@ -389,23 +389,20 @@ static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_
     if (param->add_attr_tab.num_handle == BAS_IDX_NB &&
         param->add_attr_tab.svc_uuid.uuid.uuid16 == ESP_GATT_UUID_BATTERY_SERVICE_SVC &&
         param->add_attr_tab.status == ESP_GATT_OK) {
+      logger.info("create battery attribute table successfully, the number handle = {}", (int)param->add_attr_tab.num_handle);
+      memcpy(bas_handle_table, param->add_attr_tab.handles, sizeof(bas_handle_table));
       auto start_handle = param->add_attr_tab.handles[BAS_IDX_SVC];
       hid_service_table_set_included_service_handles(start_handle,
                                                      start_handle + BAS_IDX_NB - 1);
       esp_ble_gatts_create_attr_tab(hid_gatt_db, gatts_if, IDX_HID_NB, 0);
+    }
+    if (param->add_attr_tab.num_handle == IDX_HID_NB &&
+        param->add_attr_tab.status == ESP_GATT_OK) {
+      logger.info("create hid attribute table successfully, the number handle = {}", (int)param->add_attr_tab.num_handle);
+      memcpy(hid_handle_table, param->add_attr_tab.handles, sizeof(hid_handle_table));
+      esp_ble_gatts_start_service(hid_handle_table[IDX_SVC_HID]);
     } else {
-      if (param->add_attr_tab.status != ESP_GATT_OK){
-        logger.error("create attribute table failed, error code={:#x}", (int)param->add_attr_tab.status);
-      }
-      else if (param->add_attr_tab.num_handle != IDX_HID_NB){
-        logger.error("create attribute table abnormally, num_handle ({}) \
-                        doesn't equal to IDX_HID_NB({})", (int)param->add_attr_tab.num_handle, (int)IDX_HID_NB);
-      }
-      else {
-        logger.info("create attribute table successfully, the number handle = {}", (int)param->add_attr_tab.num_handle);
-        memcpy(hid_handle_table, param->add_attr_tab.handles, sizeof(hid_handle_table));
-        esp_ble_gatts_start_service(hid_handle_table[IDX_SVC_HID]);
-      }
+      esp_ble_gatts_start_service(param->add_attr_tab.handles[0]);
     }
     break;
   }

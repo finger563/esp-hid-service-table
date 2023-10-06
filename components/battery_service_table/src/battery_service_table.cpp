@@ -37,6 +37,7 @@ struct prf_char_pres_fmt
 };
 
 uint8_t battery_level = 50;
+uint16_t bas_handle_table[BAS_IDX_NB];
 
 /// Battery Service Attribute Table
 const esp_gatts_attr_db_t bas_att_db[BAS_IDX_NB] =

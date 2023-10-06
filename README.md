@@ -3,6 +3,8 @@
 Example providing HID over GATT (HoG) profile for BLE on ESP using the ESP-IDF
 GATT Service Table APIs.
 
+https://github.com/finger563/esp-hid-service-table/assets/213467/3161d2a4-de4c-4f7d-8694-82c77d935254
+
 ## Implementation
 
 The way this example works is to create the following service tables in order:
@@ -53,3 +55,4 @@ See the Getting Started Guide for full steps to configure and use ESP-IDF to bui
 
 ## Output
 
+![CleanShot 2023-10-06 at 14 17 54](https://github.com/finger563/esp-hid-service-table/assets/213467/37ae9a23-2d4e-4ab1-917b-5496e96bcac8)

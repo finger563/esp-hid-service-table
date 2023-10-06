@@ -12,7 +12,7 @@ set(EXTRA_COMPONENT_DIRS
 
 set(
   COMPONENTS
-  "main esptool_py logger task hid_service_table"
+  "main esptool_py logger task battery_service_table device_information_service_table hid_service"
   CACHE STRING
   "List of components to include"
   )

@@ -1,7 +1,7 @@
 #include <chrono>
 #include <thread>
 
-#include "hid_service_table.hpp"
+#include "hid_service.hpp"
 
 #include "logger.hpp"
 #include "task.hpp"
@@ -64,16 +64,16 @@ extern "C" void app_main(void) {
   }
 
   // set the HID report descriptor (to be the same as the xbox elite wireless controller)
-  hid_service_table_set_report_descriptor(xb::report_descriptor, sizeof(xb::report_descriptor));
+  hid_service_set_report_descriptor(xb::report_descriptor, sizeof(xb::report_descriptor));
 
   // initialize the hid service table
-  hid_service_table_init();
+  hid_service_init();
 
   // make a simple task that prints "Hello World!" every second
   espp::Task task({
       .name = "Input Report Task",
         .callback = [&](auto &m, auto &cv) -> bool {
-          if (hid_service_table_is_connected()) {
+          if (hid_service_is_connected()) {
             logger.debug("[{:.3f}] Sending new input report!", elapsed());
             static xb::InputReport report;
             static constexpr size_t report_size = sizeof(xb::InputReport);
@@ -91,7 +91,7 @@ extern "C" void app_main(void) {
             // copy the report into the report data
             memcpy(report_data, &report, report_size);
             // send an input report
-            hid_service_table_send_input_report(report_data, report_size);
+            hid_service_send_input_report(report_data, report_size);
           }
 
           std::unique_lock<std::mutex> lock(m);

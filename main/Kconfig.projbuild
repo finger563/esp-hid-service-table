@@ -2,7 +2,7 @@ menu "HID Service Table Example Configuration"
 
     config DEVICE_NAME
         string "BLE Device Name"
-        default "HID Service Table Example"
+        default "Xbox Elite Wireless Controller"
         help
             Set the BLE device name used in advertisement of the BLE device.
 

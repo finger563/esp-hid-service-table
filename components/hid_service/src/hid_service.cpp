@@ -511,3 +511,9 @@ void hid_service_send_input_report(const uint8_t* report, size_t report_len) {
   logger.info("Sending input report of length {}", report_len);
   send_indicate((uint8_t*)report, report_len, hid_handle_table[IDX_CHAR_VAL_HID_REPORT]);
 }
+
+void hid_service_set_battery_level(const uint8_t level) {
+  logger.info("Setting battery level to {}%", level);
+  battery_level = level;
+  send_indicate(&battery_level, sizeof(battery_level), bas_handle_table[BAS_IDX_BATT_LVL_VAL]);
+}

@@ -78,6 +78,7 @@ extern "C" void app_main(void) {
             static xb::InputReport report;
             static constexpr size_t report_size = sizeof(xb::InputReport);
             static uint8_t report_data[report_size];
+            static uint8_t battery_level = 0;
             // toggle the up/down on the left joystick (axis_y, center is 32768, up is 65535, down is 0)
             if (report.axis_y == 0) {
               report.axis_y = 65535;
@@ -92,6 +93,9 @@ extern "C" void app_main(void) {
             memcpy(report_data, &report, report_size);
             // send an input report
             hid_service_send_input_report(report_data, report_size);
+            // update the battery level
+            battery_level = (battery_level + 5) % 100;
+            hid_service_set_battery_level(battery_level);
           }
 
           std::unique_lock<std::mutex> lock(m);

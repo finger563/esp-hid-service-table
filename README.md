@@ -3,7 +3,7 @@
 Example providing HID over GATT (HoG) profile for BLE on ESP using the ESP-IDF
 GATT Service Table APIs.
 
-https://github.com/finger563/esp-hid-service-table/assets/213467/3161d2a4-de4c-4f7d-8694-82c77d935254
+https://github.com/finger563/esp-hid-service-table/assets/213467/f972932c-6285-44ac-a576-f49e8d22fc9b
 
 ## Implementation
 
@@ -55,4 +55,4 @@ See the Getting Started Guide for full steps to configure and use ESP-IDF to bui
 
 ## Output
 
-![CleanShot 2023-10-06 at 14 17 54](https://github.com/finger563/esp-hid-service-table/assets/213467/37ae9a23-2d4e-4ab1-917b-5496e96bcac8)
+![CleanShot 2023-10-06 at 16 06 58](https://github.com/finger563/esp-hid-service-table/assets/213467/589c8a6e-8ba2-4419-84a7-7ddaaa60fb9f)

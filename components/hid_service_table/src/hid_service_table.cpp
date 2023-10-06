@@ -68,14 +68,14 @@ static esp_gatts_incl_svc_desc_t hid_incl_svc = {0};
 static const uint16_t hid_ext_report_ref = ESP_GATT_UUID_BATTERY_LEVEL;
 
 static const uint8_t hid_report_ref[] = {
-  0x01, // report ID mouse in
+  0x01, // report ID of the report that this reference refers to in the report descriptor
   0x01, // report type (1 = input, 2 = output, 3 = feature)
 };
 static const uint8_t hid_report_ref_feature[] = {
   0x00, // report ID feature
   0x03, // report type (1 = input, 2 = output, 3 = feature)
 };
-const uint8_t *report_descriptor = NULL;
+uint8_t *report_descriptor = NULL;
 size_t report_descriptor_len = 0;
 
 /* Full Database Description - Used to add attributes into the database */
@@ -122,7 +122,7 @@ const esp_gatts_attr_db_t hid_gatt_db[IDX_HID_NB] =
     /* Characteristic Declaration */
     [IDX_CHAR_HID_PROTOCOL_MODE]      =
     {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&character_declaration_uuid, ESP_GATT_PERM_READ,
-                           CHAR_DECLARATION_SIZE, CHAR_DECLARATION_SIZE, (uint8_t *)&char_prop_read_write}},
+                           CHAR_DECLARATION_SIZE, CHAR_DECLARATION_SIZE, (uint8_t *)&char_prop_read_write_no_resp}},
     [IDX_CHAR_VAL_HID_PROTOCOL_MODE]  =
     {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&GATTS_CHAR_UUID_HID_PROTOCOL_MODE, ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE,
                            sizeof(uint8_t), sizeof(protocol_mode), (uint8_t *)&protocol_mode}},
@@ -160,4 +160,9 @@ const esp_gatts_attr_db_t hid_gatt_db[IDX_HID_NB] =
 void hid_service_table_set_included_service_handles(uint16_t start_handle, uint16_t end_handle) {
   hid_incl_svc.start_hdl = start_handle;
   hid_incl_svc.end_hdl = end_handle;
+}
+
+void hid_service_table_set_report_descriptor(uint8_t *descriptor, size_t len) {
+  report_descriptor = descriptor;
+  report_descriptor_len = len;
 }

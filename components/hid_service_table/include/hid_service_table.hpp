@@ -51,8 +51,9 @@ enum
   };
 
 
-extern const uint8_t *report_descriptor;
+extern uint8_t *report_descriptor;
 extern size_t report_descriptor_len;
 extern const esp_gatts_attr_db_t hid_gatt_db[IDX_HID_NB];
 
+void hid_service_table_set_report_descriptor(uint8_t *descriptor, size_t len);
 void hid_service_table_set_included_service_handles(uint16_t start_handle, uint16_t end_handle);

@@ -500,16 +500,15 @@ void hid_service_init() {
   esp_ble_gatts_app_register(ESP_APP_ID);
 }
 
-void hid_service_set_report_descriptor(const uint8_t* descriptor, size_t descriptor_len) {
+void hid_service_set_report_descriptor(uint8_t* descriptor, size_t descriptor_len) {
   logger.info("Setting report descriptor of length {}", report_descriptor_len);
-  report_descriptor_len = descriptor_len;
-  report_descriptor = descriptor;
-  send_indicate((uint8_t*)report_descriptor, report_descriptor_len, hid_handle_table[IDX_CHAR_VAL_HID_REPORT_MAP]);
+  hid_service_table_set_report_descriptor(descriptor, descriptor_len);
+  esp_ble_gatts_set_attr_value(hid_handle_table[IDX_CHAR_VAL_HID_REPORT_MAP], descriptor_len, descriptor);
 }
 
 void hid_service_send_input_report(const uint8_t* report, size_t report_len) {
   logger.info("Sending input report of length {}", report_len);
-  send_indicate((uint8_t*)report, report_len, hid_handle_table[IDX_CHAR_VAL_HID_REPORT]);
+  send_indicate((uint8_t*)report, report_len, hid_handle_table[IDX_CHAR_VAL_HID_REPORT_XB]);
 }
 
 void hid_service_set_battery_level(const uint8_t level) {

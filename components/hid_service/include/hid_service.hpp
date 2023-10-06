@@ -28,6 +28,6 @@
 
 bool hid_service_is_connected();
 void hid_service_init();
-void hid_service_set_report_descriptor(const uint8_t* report_descriptor, size_t report_descriptor_len);
+void hid_service_set_report_descriptor(uint8_t* report_descriptor, size_t report_descriptor_len);
 void hid_service_send_input_report(const uint8_t* report, size_t report_len);
 void hid_service_set_battery_level(const uint8_t level);

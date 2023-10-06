@@ -63,11 +63,11 @@ extern "C" void app_main(void) {
     return;
   }
 
-  // set the HID report descriptor (to be the same as the xbox elite wireless controller)
-  hid_service_set_report_descriptor(xb::report_descriptor, sizeof(xb::report_descriptor));
-
   // initialize the hid service table
   hid_service_init();
+
+  // set the HID report descriptor (to be the same as the xbox elite wireless controller)
+  hid_service_set_report_descriptor((uint8_t*)xb::report_descriptor, sizeof(xb::report_descriptor));
 
   // make a simple task that prints "Hello World!" every second
   espp::Task task({
@@ -81,20 +81,22 @@ extern "C" void app_main(void) {
             static uint8_t battery_level = 0;
             // toggle the up/down on the left joystick (axis_y, center is 32768, up is 65535, down is 0)
             if (report.axis_y == 0) {
-              report.axis_y = 65535;
-            } else if (report.axis_y == 65535) {
+              report.axis_y = 65534;
+            } else if (report.axis_y == 65534) {
               report.axis_y = 0;
-            } else if (report.axis_y == 32768) {
+            } else if (report.axis_y == 32767) {
               report.axis_y = 0;
             } else {
-              report.axis_y = 32768;
+              report.axis_y = 32767;
             }
+            // toggle the 'b' button
+            report.btn_2 = !report.btn_2;
             // copy the report into the report data
             memcpy(report_data, &report, report_size);
             // send an input report
             hid_service_send_input_report(report_data, report_size);
             // update the battery level
-            battery_level = (battery_level + 5) % 100;
+            battery_level = (battery_level) % 100 + 5;
             hid_service_set_battery_level(battery_level);
           }
 

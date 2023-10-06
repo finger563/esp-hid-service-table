@@ -17,7 +17,7 @@ extern "C" void app_main(void) {
     return std::chrono::duration<float>(now - start).count();
   };
 
-  espp::Logger logger({.tag = "Template", .level = espp::Logger::Verbosity::DEBUG});
+  espp::Logger logger({.tag = "HID Service Table Example", .level = espp::Logger::Verbosity::DEBUG});
 
   logger.info("Bootup");
 
@@ -90,7 +90,7 @@ extern "C" void app_main(void) {
               report.axis_y = 32767;
             }
             // toggle the 'b' button
-            report.btn_2 = !report.btn_2;
+            // report.btn_2 = !report.btn_2; // NOTE: disabling this because it's really annoying...
             // copy the report into the report data
             memcpy(report_data, &report, report_size);
             // send an input report

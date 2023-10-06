@@ -2,13 +2,13 @@ menu "HID Service Table Example Configuration"
 
     config DEVICE_NAME
         string "BLE Device Name"
-        default "Xbox Elite Wireless Controller"
+        default "HID Service Table Example Device"
         help
             Set the BLE device name used in advertisement of the BLE device.
 
     config MANUFACTURER_NAME
         string "BLE Manufacturer Name"
-        default "Microsoft Corporation"
+        default "Finger563 Corp."
         help
             Set the BLE device manufacturer name used in advertisement of the BLE device.
 

@@ -69,15 +69,15 @@ extern "C" void app_main(void) {
   // set the HID report descriptor (to be the same as the xbox elite wireless controller)
   hid_service_set_report_descriptor((uint8_t*)xb::report_descriptor, sizeof(xb::report_descriptor));
 
-  // make a simple task that prints "Hello World!" every second
+  // make a task to send input reports every second
   espp::Task task({
       .name = "Input Report Task",
         .callback = [&](auto &m, auto &cv) -> bool {
+          auto start = std::chrono::steady_clock::now();
           if (hid_service_is_connected()) {
             logger.debug("[{:.3f}] Sending new input report!", elapsed());
             static xb::InputReport report;
             static constexpr size_t report_size = sizeof(xb::InputReport);
-            static uint8_t report_data[report_size];
             static constexpr uint16_t AXIS_UP_VALUE = 65534;
             static constexpr uint16_t AXIS_DOWN_VALUE = 0;
             static constexpr uint16_t AXIS_CENTER_VALUE = 32767;
@@ -105,7 +105,7 @@ extern "C" void app_main(void) {
           }
 
           std::unique_lock<std::mutex> lock(m);
-          cv.wait_for(lock, 1s);
+          cv.wait_until(lock, start + 1s);
           // we don't want to stop the task, so return false
           return false;
         },

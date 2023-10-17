@@ -18,7 +18,6 @@ static SemaphoreHandle_t ble_cb_semaphore = NULL;
 #define SEND_BLE_CB() xSemaphoreGive(ble_cb_semaphore)
 
 static std::atomic<bool> connected{false};
-static std::string manufacturer_name = CONFIG_MANUFACTURER_NAME;
 
 static uint8_t service_uuid[16] = {
   // This is the HID service UUID: 00001812-0000-1000-8000-00805f9b34fb
@@ -32,8 +31,8 @@ esp_ble_adv_data_t adv_config = {
   .min_interval        = 0x0006, // slave connection min interval, Time = min_interval * 1.25 msec
   .max_interval        = 0x000C, // slave connection max interval, Time = max_interval * 1.25 msec
   .appearance          = 0x03C0,
-  .manufacturer_len    = (uint16_t)manufacturer_name.size(),
-  .p_manufacturer_data = (uint8_t*)manufacturer_name.c_str(),
+  .manufacturer_len    = (uint16_t)strlen((const char*)manufacturer_name),
+  .p_manufacturer_data = manufacturer_name,
   .service_data_len    = 0,
   .p_service_data      = NULL,
   .service_uuid_len    = sizeof(service_uuid),
@@ -47,8 +46,8 @@ esp_ble_adv_data_t scan_rsp_config = {
   .include_name        = true,
   .include_txpower     = true,
   .appearance          = 0x03C0,
-  .manufacturer_len    = (uint16_t)manufacturer_name.size(),
-  .p_manufacturer_data = (uint8_t*)manufacturer_name.c_str(),
+  .manufacturer_len    = (uint16_t)strlen((const char*)manufacturer_name),
+  .p_manufacturer_data = manufacturer_name,
   .service_data_len    = 0,
   .p_service_data      = NULL,
   .service_uuid_len    = sizeof(service_uuid),
@@ -392,8 +391,18 @@ static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_
       logger.info("create battery attribute table successfully, the number handle = {}", (int)param->add_attr_tab.num_handle);
       memcpy(bas_handle_table, param->add_attr_tab.handles, sizeof(bas_handle_table));
       auto start_handle = param->add_attr_tab.handles[BAS_IDX_SVC];
-      hid_service_table_set_included_service_handles(start_handle,
-                                                     start_handle + BAS_IDX_NB - 1);
+      hid_service_table_set_included_battery_service_handles(start_handle,
+                                                             start_handle + BAS_IDX_NB - 1);
+      esp_ble_gatts_create_attr_tab(dis_att_db, gatts_if, DIS_IDX_NB, 0);
+    }
+    if (param->add_attr_tab.num_handle == DIS_IDX_NB &&
+        param->add_attr_tab.svc_uuid.uuid.uuid16 == ESP_GATT_UUID_DEVICE_INFO_SVC &&
+        param->add_attr_tab.status == ESP_GATT_OK) {
+      logger.info("create device information attribute table successfully, the number handle = {}", (int)param->add_attr_tab.num_handle);
+      memcpy(dis_handle_table, param->add_attr_tab.handles, sizeof(dis_handle_table));
+      auto start_handle = param->add_attr_tab.handles[DIS_IDX_SVC];
+      hid_service_table_set_included_dev_info_service_handles(start_handle,
+                                                              start_handle + DIS_IDX_NB - 1);
       esp_ble_gatts_create_attr_tab(hid_gatt_db, gatts_if, IDX_HID_NB, 0);
     }
     if (param->add_attr_tab.num_handle == IDX_HID_NB &&
@@ -515,4 +524,40 @@ void hid_service_set_battery_level(const uint8_t level) {
   logger.info("Setting battery level to {}%", level);
   battery_level = level;
   send_indicate(&battery_level, sizeof(battery_level), bas_handle_table[BAS_IDX_BATT_LVL_VAL]);
+}
+
+void hid_service_set_pnp_id(const uint16_t vendor_id, const uint16_t product_id, const uint16_t product_version) {
+  // format of pnp:
+  // 0xVVVVPPPPIIIISS
+  // VVVV: product version
+  // PPPP: product id
+  // IIII: vendor id
+  // SS: vendor id source
+  uint64_t pnp = 0x02; // vendor id source
+  pnp |= (uint64_t)vendor_id << 8;
+  pnp |= (uint64_t)product_id << 24;
+  pnp |= (uint64_t)product_version << 40;
+  logger.info("Setting PNP ID to {:#x}", pnp);
+  // now actually set the variable
+  pnp_id = pnp;
+  // and make sure we send it
+  esp_ble_gatts_set_attr_value(dis_handle_table[DIS_IDX_PNP_VAL], 7, (uint8_t*)&pnp_id);
+}
+
+void hid_service_set_manufacturer_name(std::string_view manufacturer_name_string_view) {
+  logger.info("Setting manufacturer name to {}", manufacturer_name_string_view);
+  // copy the manufacturer name into the manufacturer name buffer
+  std::copy(manufacturer_name_string_view.begin(), manufacturer_name_string_view.end(), manufacturer_name);
+  manufacturer_name_length = manufacturer_name_string_view.size();
+  // and make sure we send it
+  esp_ble_gatts_set_attr_value(dis_handle_table[DIS_IDX_MANUFACTURER_NAME_VAL], manufacturer_name_string_view.size(), manufacturer_name);
+}
+
+void hid_service_set_serial_number(std::string_view serial_number_string_view) {
+  logger.info("Setting serial number to {}", serial_number_string_view);
+  // copy the serial number into the serial number buffer
+  std::copy(serial_number_string_view.begin(), serial_number_string_view.end(), serial_number);
+  serial_number_length = serial_number_string_view.size();
+  // and make sure we send it
+  esp_ble_gatts_set_attr_value(dis_handle_table[DIS_IDX_SERIAL_NUMBER_VAL], serial_number_string_view.size(), serial_number);
 }

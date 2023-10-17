@@ -17,7 +17,11 @@ enum
     // HID Service, UUID: 0x1812
     IDX_SVC_HID,
 
-    IDX_HID_INCL_SVC,
+    // Included Service Battery Service, UUID: 0x180F
+    IDX_HID_INCL_BAT_SVC,
+
+    // Included Service Device Information Service, UUID: 0x180A
+    IDX_HID_INCL_DIS_SVC,
 
     // HID Information characteristic, UUID: 0x2A4A, Properties: read
     IDX_CHAR_HID_INFO,
@@ -56,4 +60,5 @@ extern size_t report_descriptor_len;
 extern const esp_gatts_attr_db_t hid_gatt_db[IDX_HID_NB];
 
 void hid_service_table_set_report_descriptor(uint8_t *descriptor, size_t len);
-void hid_service_table_set_included_service_handles(uint16_t start_handle, uint16_t end_handle);
+void hid_service_table_set_included_battery_service_handles(uint16_t start_handle, uint16_t end_handle);
+void hid_service_table_set_included_dev_info_service_handles(uint16_t start_handle, uint16_t end_handle);

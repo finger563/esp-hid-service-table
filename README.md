@@ -55,4 +55,4 @@ See the Getting Started Guide for full steps to configure and use ESP-IDF to bui
 
 ## Output
 
-![CleanShot 2023-10-06 at 16 06 58](https://github.com/finger563/esp-hid-service-table/assets/213467/589c8a6e-8ba2-4419-84a7-7ddaaa60fb9f)
+![CleanShot 2023-10-18 at 08 42 44](https://github.com/finger563/esp-hid-service-table/assets/213467/e602b08e-7a57-4287-89e4-11af1807e908)

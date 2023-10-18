@@ -29,7 +29,9 @@
 #include "event_names.hpp"
 
 bool hid_service_is_connected();
-void hid_service_init();
+esp_bd_addr_t *hid_service_get_peer_address();
+void hid_service_init(std::string_view device_name_string_view);
+void hid_service_set_device_name(std::string_view device_name_string_view);
 void hid_service_set_report_descriptor(uint8_t* report_descriptor, size_t report_descriptor_len);
 void hid_service_send_input_report(const uint8_t* report, size_t report_len);
 void hid_service_set_battery_level(const uint8_t level);

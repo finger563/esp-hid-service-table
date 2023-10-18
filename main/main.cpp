@@ -66,7 +66,7 @@ extern "C" void app_main(void) {
   }
 
   // initialize the hid service table
-  hid_service_init();
+  hid_service_init(CONFIG_DEVICE_NAME);
 
   // set the device plug and play ID (vendor ID, product ID, product version)
   uint16_t vendor_id = CONFIG_VENDOR_ID;

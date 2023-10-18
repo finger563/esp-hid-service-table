@@ -18,6 +18,9 @@ static SemaphoreHandle_t ble_cb_semaphore = NULL;
 #define SEND_BLE_CB() xSemaphoreGive(ble_cb_semaphore)
 
 static std::atomic<bool> connected{false};
+static esp_bd_addr_t ble_peer_address;
+
+std::string device_name;
 
 static uint8_t service_uuid[16] = {
   // This is the HID service UUID: 00001812-0000-1000-8000-00805f9b34fb
@@ -26,13 +29,12 @@ static uint8_t service_uuid[16] = {
 };
 esp_ble_adv_data_t adv_config = {
   .set_scan_rsp        = false,
-  .include_name        = true,
   .include_txpower     = true,
   .min_interval        = 0x0006, // slave connection min interval, Time = min_interval * 1.25 msec
   .max_interval        = 0x000C, // slave connection max interval, Time = max_interval * 1.25 msec
-  .appearance          = 0x03C0,
-  .manufacturer_len    = (uint16_t)strlen((const char*)manufacturer_name),
-  .p_manufacturer_data = manufacturer_name,
+  .appearance          = 0x00,
+  .manufacturer_len    = 0,
+  .p_manufacturer_data = NULL,
   .service_data_len    = 0,
   .p_service_data      = NULL,
   .service_uuid_len    = sizeof(service_uuid),
@@ -44,15 +46,9 @@ esp_ble_adv_data_t adv_config = {
 esp_ble_adv_data_t scan_rsp_config = {
   .set_scan_rsp        = true,
   .include_name        = true,
-  .include_txpower     = true,
-  .appearance          = 0x03C0,
+  .appearance          = ESP_BLE_APPEARANCE_HID_GAMEPAD,
   .manufacturer_len    = (uint16_t)strlen((const char*)manufacturer_name),
   .p_manufacturer_data = manufacturer_name,
-  .service_data_len    = 0,
-  .p_service_data      = NULL,
-  .service_uuid_len    = sizeof(service_uuid),
-  .p_service_uuid      = service_uuid,
-  .flag = (ESP_BLE_ADV_FLAG_GEN_DISC | ESP_BLE_ADV_FLAG_BREDR_NOT_SPT),
 };
 
 static esp_ble_adv_params_t adv_params = {
@@ -143,6 +139,8 @@ static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param
     }
     break;
   case ESP_GAP_BLE_ADV_START_COMPLETE_EVT:
+    // zero out the peer address
+    memset(ble_peer_address, 0, ESP_BD_ADDR_LEN);
     /* advertising start complete event to indicate advertising start successfully or failed */
     if (param->adv_start_cmpl.status != ESP_BT_STATUS_SUCCESS) {
       logger.error("advertising start failed");
@@ -196,6 +194,8 @@ static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param
       logger.error("BLE GAP AUTH ERROR: {:#x}", param->ble_security.auth_cmpl.fail_reason);
     } else {
       logger.info("BLE GAP AUTH SUCCESS");
+      // save the address of the peer device
+      memcpy(ble_peer_address, param->ble_security.auth_cmpl.bd_addr, ESP_BD_ADDR_LEN);
     }
     break;
 
@@ -376,7 +376,13 @@ static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_
 
     //start sent the update connection parameters to the peer device.
     esp_ble_gap_update_conn_params(&conn_params);
+
+    // save the connected state
     connected = true;
+    memcpy(ble_peer_address, param->connect.remote_bda, ESP_BD_ADDR_LEN);
+
+    // set the encryption
+    esp_ble_set_encryption(param->connect.remote_bda, ESP_BLE_SEC_ENCRYPT_NO_MITM);
   }
     break;
   case ESP_GATTS_DISCONNECT_EVT:
@@ -478,11 +484,16 @@ bool hid_service_is_connected() {
   return connected;
 }
 
-void hid_service_init() {
+esp_bd_addr_t *hid_service_get_peer_address(void) { return &ble_peer_address; }
+
+void hid_service_init(std::string_view device_name_string_view) {
   logger.info("Initializing BLE");
 
+  hid_service_set_device_name(device_name_string_view);
+
   // Set the type of authentication needed
-  esp_ble_auth_req_t auth_req = ESP_LE_AUTH_REQ_SC_MITM_BOND;
+  // esp_ble_auth_req_t auth_req = ESP_LE_AUTH_REQ_SC_MITM_BOND;
+  esp_ble_auth_req_t auth_req = ESP_LE_AUTH_BOND;
   // set the IO capability of the device
   esp_ble_io_cap_t iocap = ESP_IO_CAP_NONE;
   // set the out of band configuration
@@ -490,12 +501,12 @@ void hid_service_init() {
   // set the key configuration
   uint8_t spec_auth = ESP_BLE_ONLY_ACCEPT_SPECIFIED_AUTH_DISABLE;
 
-  // esp_ble_gap_set_security_param(ESP_BLE_SM_SET_STATIC_PASSKEY, (void*)&PASSKEY, sizeof(uint32_t));
   esp_ble_gap_set_security_param(ESP_BLE_SM_IOCAP_MODE, &iocap, 1);
   esp_ble_gap_set_security_param(ESP_BLE_SM_AUTHEN_REQ_MODE, &auth_req, 1);
   esp_ble_gap_set_security_param(ESP_BLE_SM_OOB_SUPPORT, &oob_support, sizeof(uint8_t));
   esp_ble_gap_set_security_param(ESP_BLE_SM_ONLY_ACCEPT_SPECIFIED_SEC_AUTH, &spec_auth, sizeof(uint8_t));
 
+  /*
   uint8_t init_key = ESP_BLE_ENC_KEY_MASK | ESP_BLE_ID_KEY_MASK;
   uint8_t rsp_key = ESP_BLE_ENC_KEY_MASK | ESP_BLE_ID_KEY_MASK;
   uint8_t key_size = 16; //the key size should be 7~16 bytes
@@ -503,10 +514,19 @@ void hid_service_init() {
   esp_ble_gap_set_security_param(ESP_BLE_SM_SET_INIT_KEY, &init_key, 1);
   esp_ble_gap_set_security_param(ESP_BLE_SM_SET_RSP_KEY, &rsp_key, 1);
   esp_ble_gap_set_security_param(ESP_BLE_SM_MAX_KEY_SIZE, &key_size, 1);
+  */
 
   esp_ble_gatts_register_callback(gatts_event_handler);
   esp_ble_gap_register_callback(gap_event_handler);
   esp_ble_gatts_app_register(ESP_APP_ID);
+}
+
+void hid_service_set_device_name(std::string_view device_name_string_view) {
+    logger.info("Setting device name to '{}'", device_name_string_view);
+    // copy the device name into the device name buffer
+    device_name = device_name_string_view;
+    // and make sure we send it
+    esp_ble_gap_set_device_name(device_name.c_str());
 }
 
 void hid_service_set_report_descriptor(uint8_t* descriptor, size_t descriptor_len) {

@@ -510,7 +510,7 @@ void hid_service_init() {
 }
 
 void hid_service_set_report_descriptor(uint8_t* descriptor, size_t descriptor_len) {
-  logger.info("Setting report descriptor of length {}", report_descriptor_len);
+  logger.info("Setting report descriptor of length {}", descriptor_len);
   hid_service_table_set_report_descriptor(descriptor, descriptor_len);
   esp_ble_gatts_set_attr_value(hid_handle_table[IDX_CHAR_VAL_HID_REPORT_MAP], descriptor_len, descriptor);
 }

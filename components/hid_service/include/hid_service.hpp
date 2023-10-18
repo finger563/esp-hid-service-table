@@ -35,4 +35,5 @@ void hid_service_send_input_report(const uint8_t* report, size_t report_len);
 void hid_service_set_battery_level(const uint8_t level);
 void hid_service_set_pnp_id(const uint16_t vendor_id, const uint16_t product_id, const uint16_t product_version);
 void hid_service_set_manufacturer_name(std::string_view manufacturer_name_string_view);
+void hid_service_set_model_number(std::string_view model_number_string_view);
 void hid_service_set_serial_number(std::string_view serial_number_string_view);

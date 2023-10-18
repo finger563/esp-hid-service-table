@@ -103,7 +103,7 @@ static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param
     break;
   }
   case ESP_GAP_BLE_SCAN_RESULT_EVT: {
-    logger.info("BLE GAP EVENT SCAN_RESULT");
+    logger.debug("BLE GAP EVENT SCAN_RESULT");
     break;
   }
   case ESP_GAP_BLE_SCAN_STOP_COMPLETE_EVT: {
@@ -115,28 +115,28 @@ static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param
      * ADVERTISEMENT
      * */
   case ESP_GAP_BLE_ADV_DATA_RAW_SET_COMPLETE_EVT:
-    logger.info("BLE GAP ADV_DATA_RAW_SET_COMPLETE");
+    logger.debug("BLE GAP ADV_DATA_RAW_SET_COMPLETE");
     adv_config_done &= (~ADV_CONFIG_FLAG);
     if (adv_config_done == 0){
       esp_ble_gap_start_advertising(&adv_params);
     }
     break;
   case ESP_GAP_BLE_ADV_DATA_SET_COMPLETE_EVT:
-    logger.info("BLE GAP ADV_DATA_SET_COMPLETE");
+    logger.debug("BLE GAP ADV_DATA_SET_COMPLETE");
     adv_config_done &= (~ADV_CONFIG_FLAG);
     if (adv_config_done == 0){
       esp_ble_gap_start_advertising(&adv_params);
     }
     break;
   case ESP_GAP_BLE_SCAN_RSP_DATA_RAW_SET_COMPLETE_EVT:
-    logger.info("BLE GAP SCAN_RSP_DATA_RAW_SET_COMPLETE");
+    logger.debug("BLE GAP SCAN_RSP_DATA_RAW_SET_COMPLETE");
     adv_config_done &= (~SCAN_RSP_CONFIG_FLAG);
     if (adv_config_done == 0){
       esp_ble_gap_start_advertising(&adv_params);
     }
     break;
   case ESP_GAP_BLE_SCAN_RSP_DATA_SET_COMPLETE_EVT:
-    logger.info("BLE GAP SCAN_RSP_DATA_SET_COMPLETE");
+    logger.debug("BLE GAP SCAN_RSP_DATA_SET_COMPLETE");
     adv_config_done &= (~SCAN_RSP_CONFIG_FLAG);
     if (adv_config_done == 0){
       esp_ble_gap_start_advertising(&adv_params);
@@ -159,7 +159,7 @@ static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param
     }
     break;
   case ESP_GAP_BLE_ADV_TERMINATED_EVT:
-    logger.info("BLE GAP ADV_TERMINATED");
+    logger.debug("BLE GAP ADV_TERMINATED");
     break;
 
     /*
@@ -168,7 +168,7 @@ static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param
   case ESP_GAP_BLE_GET_DEV_NAME_COMPLETE_EVT:
     logger.debug("BLE GAP GET_DEV_NAME_COMPLETE");
     // print the name
-    logger.info("BLE GAP DEVICE NAME: {}", param->get_dev_name_cmpl.name);
+    logger.debug("BLE GAP DEVICE NAME: {}", param->get_dev_name_cmpl.name);
     break;
 
     /*
@@ -200,7 +200,7 @@ static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param
     break;
 
   case ESP_GAP_BLE_KEY_EVT: // shows the ble key info share with peer device to the user.
-    logger.info("BLE GAP KEY type = {}",
+    logger.debug("BLE GAP KEY type = {}",
                 esp_ble_key_type_str(param->ble_security.ble_key.key_type));
     break;
 
@@ -208,7 +208,7 @@ static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param
     int received_passkey = (int)param->ble_security.key_notif.passkey;
     // The app will receive this evt when the IO has Output capability and the peer device IO
     // has Input capability. Show the passkey number to the user to input it in the peer device.
-    logger.info("BLE GAP PASSKEY_NOTIF passkey: {}", received_passkey);
+    logger.debug("BLE GAP PASSKEY_NOTIF passkey: {}", received_passkey);
   }
     break;
 
@@ -217,7 +217,7 @@ static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param
     // The app will receive this event when the IO has DisplayYesNO capability and the peer
     // device IO also has DisplayYesNo capability. show the passkey number to the user to
     // confirm it with the number displayed by peer device.
-    logger.info("BLE GAP NC_REQ passkey: {}", received_passkey);
+    logger.debug("BLE GAP NC_REQ passkey: {}", received_passkey);
     esp_ble_confirm_reply(param->ble_security.ble_req.bd_addr, true);
   }
     break;
@@ -225,7 +225,7 @@ static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param
   case ESP_GAP_BLE_PASSKEY_REQ_EVT: // ESP_IO_CAP_IN
     // The app will receive this evt when the IO has Input capability and the peer device IO has
     // Output capability. See the passkey number on the peer device and send it back.
-    logger.info("BLE GAP PASSKEY_REQ");
+    logger.debug("BLE GAP PASSKEY_REQ");
     // TODO: uncomment below and set the passkey
     // esp_ble_passkey_reply(param->ble_security.key_notif.bd_addr, true, PASSKEY);
     break;
@@ -246,7 +246,7 @@ static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param
     break;
 
   case ESP_GAP_BLE_SEC_REQ_EVT:
-    logger.info("BLE GAP SEC_REQ");
+    logger.debug("BLE GAP SEC_REQ");
 
     // Send the positive(true) security response to the peer device to accept the security
     // request. If not accept the security request, should send the security response with
@@ -255,7 +255,7 @@ static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param
     break;
 
   case ESP_GAP_BLE_PHY_UPDATE_COMPLETE_EVT:
-    logger.info("BLE GAP PHY_UPDATE_COMPLETE");
+    logger.debug("BLE GAP PHY_UPDATE_COMPLETE");
     break;
 
   case ESP_GAP_BLE_SET_LOCAL_PRIVACY_COMPLETE_EVT:
@@ -288,7 +288,7 @@ static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_
                (int)gatts_if);
   switch (event) {
   case ESP_GATTS_REG_EVT:
-    logger.info("ESP_GATTS_REG_EVT");
+    logger.debug("ESP_GATTS_REG_EVT");
     esp_ble_gap_set_device_name(CONFIG_DEVICE_NAME);
     esp_ble_gap_config_adv_data(&adv_config);
     esp_ble_gap_config_adv_data(&scan_rsp_config);
@@ -347,23 +347,23 @@ static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_
     logger.warn("ESP_GATTS_EXEC_WRITE_EVT not implemented");
     break;
   case ESP_GATTS_SET_ATTR_VAL_EVT:
-    logger.info("ESP_GATTS_SET_ATTR_VAL_EVT, attr_handle {}, srvc_handle {}, status {}",
+    logger.debug("ESP_GATTS_SET_ATTR_VAL_EVT, attr_handle {}, srvc_handle {}, status {}",
                 (int)param->set_attr_val.attr_handle,
                 (int)param->set_attr_val.srvc_handle,
                 (int)param->set_attr_val.status);
     break;
   case ESP_GATTS_MTU_EVT:
-    logger.info("ESP_GATTS_MTU_EVT, MTU {}", (int)param->mtu.mtu);
+    logger.debug("ESP_GATTS_MTU_EVT, MTU {}", (int)param->mtu.mtu);
     break;
   case ESP_GATTS_CONF_EVT:
-    logger.info("ESP_GATTS_CONF_EVT, status = {}, attr_handle {}", (int)param->conf.status, (int)param->conf.handle);
+    logger.debug("ESP_GATTS_CONF_EVT, status = {}, attr_handle {}", (int)param->conf.status, (int)param->conf.handle);
 
     break;
   case ESP_GATTS_START_EVT:
-    logger.info("SERVICE_START_EVT, status {}, service_handle {}", (int)param->start.status, (int)param->start.service_handle);
+    logger.debug("SERVICE_START_EVT, status {}, service_handle {}", (int)param->start.status, (int)param->start.service_handle);
     break;
   case ESP_GATTS_CONNECT_EVT: {
-    logger.info("ESP_GATTS_CONNECT_EVT, conn_id = {}", (int)param->connect.conn_id);
+    logger.debug("ESP_GATTS_CONNECT_EVT, conn_id = {}", (int)param->connect.conn_id);
     // update the connection id to each profile table
     hid_profile_tab[PROFILE_APP_IDX].conn_id = param->connect.conn_id;
     esp_ble_conn_update_params_t conn_params = {0};
@@ -380,7 +380,7 @@ static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_
   }
     break;
   case ESP_GATTS_DISCONNECT_EVT:
-    logger.info("ESP_GATTS_DISCONNECT_EVT, reason = {:#x}", (int)param->disconnect.reason);
+    logger.debug("ESP_GATTS_DISCONNECT_EVT, reason = {:#x}", (int)param->disconnect.reason);
     connected = false;
     esp_ble_gap_start_advertising(&adv_params);
     break;
@@ -537,6 +537,8 @@ void hid_service_set_pnp_id(const uint16_t vendor_id, const uint16_t product_id,
   pnp |= (uint64_t)vendor_id << 8;
   pnp |= (uint64_t)product_id << 24;
   pnp |= (uint64_t)product_version << 40;
+  logger.info("Building PnP from vendor_id={:#x}, product_id={:#x}, product_version={:#x}",
+              vendor_id, product_id, product_version);
   logger.info("Setting PNP ID to {:#x}", pnp);
   // now actually set the variable
   pnp_id = pnp;
@@ -545,19 +547,28 @@ void hid_service_set_pnp_id(const uint16_t vendor_id, const uint16_t product_id,
 }
 
 void hid_service_set_manufacturer_name(std::string_view manufacturer_name_string_view) {
-  logger.info("Setting manufacturer name to {}", manufacturer_name_string_view);
+  logger.info("Setting manufacturer name to '{}'", manufacturer_name_string_view);
   // copy the manufacturer name into the manufacturer name buffer
   std::copy(manufacturer_name_string_view.begin(), manufacturer_name_string_view.end(), manufacturer_name);
   manufacturer_name_length = manufacturer_name_string_view.size();
   // and make sure we send it
-  esp_ble_gatts_set_attr_value(dis_handle_table[DIS_IDX_MANUFACTURER_NAME_VAL], manufacturer_name_string_view.size(), manufacturer_name);
+  esp_ble_gatts_set_attr_value(dis_handle_table[DIS_IDX_MANUFACTURER_NAME_VAL], manufacturer_name_length, manufacturer_name);
+}
+
+void hid_service_set_model_number(std::string_view model_number_string_view) {
+  logger.info("Setting model number to '{}'", model_number_string_view);
+  // copy the model number into the model number buffer
+  std::copy(model_number_string_view.begin(), model_number_string_view.end(), model_number);
+  model_number_length = model_number_string_view.size();
+  // and make sure we send it
+  esp_ble_gatts_set_attr_value(dis_handle_table[DIS_IDX_MODEL_NUMBER_VAL], model_number_length, model_number);
 }
 
 void hid_service_set_serial_number(std::string_view serial_number_string_view) {
-  logger.info("Setting serial number to {}", serial_number_string_view);
+  logger.info("Setting serial number to '{}'", serial_number_string_view);
   // copy the serial number into the serial number buffer
   std::copy(serial_number_string_view.begin(), serial_number_string_view.end(), serial_number);
   serial_number_length = serial_number_string_view.size();
   // and make sure we send it
-  esp_ble_gatts_set_attr_value(dis_handle_table[DIS_IDX_SERIAL_NUMBER_VAL], serial_number_string_view.size(), serial_number);
+  esp_ble_gatts_set_attr_value(dis_handle_table[DIS_IDX_SERIAL_NUMBER_VAL], serial_number_length, serial_number);
 }

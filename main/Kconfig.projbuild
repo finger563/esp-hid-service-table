@@ -2,14 +2,38 @@ menu "HID Service Table Example Configuration"
 
     config DEVICE_NAME
         string "BLE Device Name"
-        default "HID Service Table Example Device"
+        default "Xbox Elite Wireless Controller"
         help
             Set the BLE device name used in advertisement of the BLE device.
 
     config MANUFACTURER_NAME
         string "BLE Manufacturer Name"
-        default "Finger563 Corp."
+        default "Microsoft Corporation"
         help
             Set the BLE device manufacturer name used in advertisement of the BLE device.
+
+    config VENDOR_ID
+        hex "PnP Vendor ID"
+        default 0x045E
+        help
+            Set the Plug-and-play vendor ID used in advertisement of the BLE device.
+            Default is set to be Microsoft Corporation's vendor ID: 0x045E.
+
+    config PRODUCT_ID
+        hex "PnP Product ID"
+        default 0x02FD
+        help
+            Set the Plug-and-play product ID used in advertisement of the BLE device.
+            Default is set to be xbox one controller's product ID: 0x02FD
+
+    config PRODUCT_VERSION
+        hex "PnP Product Version"
+        default 0x0100
+        help
+            Set the Plug-and-play product version used in advertisement of the BLE device.
+            This is a 16-bit value encoded as 8-bit major version, 4-bit minor version,
+            and 4-bit sub-minor version. 0xJJMN, where JJ is the major version, M is the
+            minor version, and N is the sub-minor version. E.g. 2.1.3 is 0x0213, and
+            2.0.0 is 0x0200. Default is version 1.0.0: 0x0100.
 
 endmenu

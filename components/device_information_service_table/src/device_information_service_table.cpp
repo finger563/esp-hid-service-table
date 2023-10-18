@@ -39,7 +39,7 @@ uint64_t pnp_id = 0x010002FD045E02;
 static constexpr uint16_t PNP_ID_SIZE = 7;
 
 /// Device Info Manufacturer Name
-uint8_t manufacturer_name[MANUFACTURER_NAME_MAX_LEN] = CONFIG_MANUFACTURER_NAME;
+uint8_t manufacturer_name[MANUFACTURER_NAME_MAX_LEN] = "Microsoft Corporation";
 uint16_t manufacturer_name_length = strlen((char*)manufacturer_name);
 
 /// Device Info Model Number

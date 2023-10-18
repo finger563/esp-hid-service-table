@@ -5,6 +5,8 @@ GATT Service Table APIs.
 
 https://github.com/finger563/esp-hid-service-table/assets/213467/f972932c-6285-44ac-a576-f49e8d22fc9b
 
+https://github.com/finger563/esp-hid-service-table/assets/213467/a30da3aa-47da-4cad-b3cb-7772f54a4562
+
 ## Implementation
 
 The way this example works is to create the following service tables in order:

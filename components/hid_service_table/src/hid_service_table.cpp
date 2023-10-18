@@ -63,7 +63,9 @@ static const uint8_t hid_info[] = {
   HID_FLAGS               // Flags
 };
 
-static esp_gatts_incl_svc_desc_t hid_incl_svc = {0};
+static esp_gatts_incl_svc_desc_t hid_incl_bat_svc = {0};
+
+static esp_gatts_incl_svc_desc_t hid_incl_dev_info_svc = {0};
 
 static const uint16_t hid_ext_report_ref = ESP_GATT_UUID_BATTERY_LEVEL;
 
@@ -87,11 +89,19 @@ const esp_gatts_attr_db_t hid_gatt_db[IDX_HID_NB] =
                            sizeof(uint16_t), sizeof(GATTS_SERVICE_UUID_HID), (uint8_t *)&GATTS_SERVICE_UUID_HID}},
 
     // Include service UUID for the battery service which should be included within this service
-    [IDX_HID_INCL_SVC]  =
+    [IDX_HID_INCL_BAT_SVC]  =
     {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&include_service_uuid,
                            ESP_GATT_PERM_READ,
                            sizeof(esp_gatts_incl_svc_desc_t), sizeof(esp_gatts_incl_svc_desc_t),
-                           (uint8_t *)&hid_incl_svc}},
+                           (uint8_t *)&hid_incl_bat_svc}},
+
+    // Include service UUID for the device information service which should be included within this service
+    [IDX_HID_INCL_DIS_SVC]  =
+    {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&include_service_uuid,
+                           ESP_GATT_PERM_READ,
+                           sizeof(esp_gatts_incl_svc_desc_t), sizeof(esp_gatts_incl_svc_desc_t),
+                           (uint8_t *)&hid_incl_dev_info_svc}},
+
     /* Characteristic Declaration */
     [IDX_CHAR_HID_INFO]     =
     {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&character_declaration_uuid, ESP_GATT_PERM_READ,
@@ -157,9 +167,14 @@ const esp_gatts_attr_db_t hid_gatt_db[IDX_HID_NB] =
 
   };
 
-void hid_service_table_set_included_service_handles(uint16_t start_handle, uint16_t end_handle) {
-  hid_incl_svc.start_hdl = start_handle;
-  hid_incl_svc.end_hdl = end_handle;
+void hid_service_table_set_included_battery_service_handles(uint16_t start_handle, uint16_t end_handle) {
+  hid_incl_bat_svc.start_hdl = start_handle;
+  hid_incl_bat_svc.end_hdl = end_handle;
+}
+
+void hid_service_table_set_included_dev_info_service_handles(uint16_t start_handle, uint16_t end_handle) {
+  hid_incl_dev_info_svc.start_hdl = start_handle;
+  hid_incl_dev_info_svc.end_hdl = end_handle;
 }
 
 void hid_service_table_set_report_descriptor(uint8_t *descriptor, size_t len) {

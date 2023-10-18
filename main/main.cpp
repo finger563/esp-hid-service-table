@@ -1,6 +1,8 @@
 #include <chrono>
 #include <thread>
 
+#include <esp_random.h>
+
 #include "hid_service.hpp"
 
 #include "logger.hpp"
@@ -65,6 +67,25 @@ extern "C" void app_main(void) {
 
   // initialize the hid service table
   hid_service_init();
+
+  // set the device plug and play ID (vendor ID, product ID, product version)
+  uint16_t vendor_id = CONFIG_VENDOR_ID;
+  uint16_t product_id = CONFIG_PRODUCT_ID;
+  uint16_t product_version = CONFIG_PRODUCT_VERSION;
+  hid_service_set_pnp_id(vendor_id, product_id, product_version);
+
+  // set the manufacturer name
+  std::string manufacturer_name = CONFIG_MANUFACTURER_NAME;
+  hid_service_set_manufacturer_name(manufacturer_name);
+
+  // set the model number string, which is the product ID in hex
+  std::string model_number = fmt::format("{:04x}", product_id);
+  hid_service_set_model_number(model_number);
+
+  // set the serial number
+  uint32_t random_number = esp_random();
+  std::string serial_number = fmt::format("{:010d}", random_number);
+  hid_service_set_serial_number(serial_number);
 
   // set the HID report descriptor (to be the same as the xbox elite wireless controller)
   hid_service_set_report_descriptor((uint8_t*)xb::report_descriptor, sizeof(xb::report_descriptor));

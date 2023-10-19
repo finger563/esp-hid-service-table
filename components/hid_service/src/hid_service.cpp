@@ -86,6 +86,20 @@ static struct gatts_profile_inst hid_profile_tab[PROFILE_NUM] = {
   },
 };
 
+static bool is_bonded(esp_bd_addr_t bd_addr) {
+  int dev_num = esp_ble_get_bond_device_num();
+  esp_ble_bond_dev_t *dev_list =
+    static_cast<esp_ble_bond_dev_t *>(malloc(sizeof(esp_ble_bond_dev_t) * dev_num));
+  esp_ble_get_bond_device_list(&dev_num, dev_list);
+  for (int i = 0; i < dev_num; i++) {
+    if (memcmp(dev_list[i].bd_addr, bd_addr, ESP_BD_ADDR_LEN) == 0) {
+      free(dev_list);
+      return true;
+    }
+  }
+  free(dev_list);
+  return false;
+}
 
 static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param)
 {
@@ -194,8 +208,12 @@ static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param
       logger.error("BLE GAP AUTH ERROR: {:#x}", param->ble_security.auth_cmpl.fail_reason);
     } else {
       logger.info("BLE GAP AUTH SUCCESS");
+      // save the connected state
+      connected = true;
       // save the address of the peer device
       memcpy(ble_peer_address, param->ble_security.auth_cmpl.bd_addr, ESP_BD_ADDR_LEN);
+      // send the report map
+      esp_ble_gatts_set_attr_value(hid_handle_table[IDX_CHAR_VAL_HID_REPORT_MAP], report_descriptor_len, report_descriptor);
     }
     break;
 
@@ -377,12 +395,19 @@ static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_
     //start sent the update connection parameters to the peer device.
     esp_ble_gap_update_conn_params(&conn_params);
 
-    // save the connected state
-    connected = true;
-    memcpy(ble_peer_address, param->connect.remote_bda, ESP_BD_ADDR_LEN);
-
     // set the encryption
     esp_ble_set_encryption(param->connect.remote_bda, ESP_BLE_SEC_ENCRYPT_NO_MITM);
+
+    // only if the device is bonded, send the report map
+    if (is_bonded(param->connect.remote_bda)) {
+      logger.info("Device is already bonded, sending report map");
+      // save the connected state
+      connected = true;
+      memcpy(ble_peer_address, param->connect.remote_bda, ESP_BD_ADDR_LEN);
+
+      // send the report map
+      esp_ble_gatts_set_attr_value(hid_handle_table[IDX_CHAR_VAL_HID_REPORT_MAP], report_descriptor_len, report_descriptor);
+    }
   }
     break;
   case ESP_GATTS_DISCONNECT_EVT:
@@ -489,8 +514,6 @@ esp_bd_addr_t *hid_service_get_peer_address(void) { return &ble_peer_address; }
 void hid_service_init(std::string_view device_name_string_view) {
   logger.info("Initializing BLE");
 
-  hid_service_set_device_name(device_name_string_view);
-
   // Set the type of authentication needed
   // esp_ble_auth_req_t auth_req = ESP_LE_AUTH_REQ_SC_MITM_BOND;
   esp_ble_auth_req_t auth_req = ESP_LE_AUTH_BOND;
@@ -506,7 +529,6 @@ void hid_service_init(std::string_view device_name_string_view) {
   esp_ble_gap_set_security_param(ESP_BLE_SM_OOB_SUPPORT, &oob_support, sizeof(uint8_t));
   esp_ble_gap_set_security_param(ESP_BLE_SM_ONLY_ACCEPT_SPECIFIED_SEC_AUTH, &spec_auth, sizeof(uint8_t));
 
-  /*
   uint8_t init_key = ESP_BLE_ENC_KEY_MASK | ESP_BLE_ID_KEY_MASK;
   uint8_t rsp_key = ESP_BLE_ENC_KEY_MASK | ESP_BLE_ID_KEY_MASK;
   uint8_t key_size = 16; //the key size should be 7~16 bytes
@@ -514,11 +536,12 @@ void hid_service_init(std::string_view device_name_string_view) {
   esp_ble_gap_set_security_param(ESP_BLE_SM_SET_INIT_KEY, &init_key, 1);
   esp_ble_gap_set_security_param(ESP_BLE_SM_SET_RSP_KEY, &rsp_key, 1);
   esp_ble_gap_set_security_param(ESP_BLE_SM_MAX_KEY_SIZE, &key_size, 1);
-  */
 
   esp_ble_gatts_register_callback(gatts_event_handler);
   esp_ble_gap_register_callback(gap_event_handler);
   esp_ble_gatts_app_register(ESP_APP_ID);
+
+  hid_service_set_device_name(device_name_string_view);
 }
 
 void hid_service_set_device_name(std::string_view device_name_string_view) {

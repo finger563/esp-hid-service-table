@@ -10,6 +10,19 @@
 
 #include "xbox.hpp"
 
+void remove_all_bonded_devices(void) {
+    int dev_num = esp_ble_get_bond_device_num();
+
+    esp_ble_bond_dev_t *dev_list =
+        static_cast<esp_ble_bond_dev_t *>(malloc(sizeof(esp_ble_bond_dev_t) * dev_num));
+    esp_ble_get_bond_device_list(&dev_num, dev_list);
+    for (int i = 0; i < dev_num; i++) {
+        esp_ble_remove_bond_device(dev_list[i].bd_addr);
+    }
+
+    free(dev_list);
+}
+
 using namespace std::chrono_literals;
 
 extern "C" void app_main(void) {
@@ -64,6 +77,8 @@ extern "C" void app_main(void) {
     logger.error("enable bluetooth failed");
     return;
   }
+
+  remove_all_bonded_devices();
 
   // initialize the hid service table
   hid_service_init(CONFIG_DEVICE_NAME);

@@ -146,8 +146,8 @@ const esp_gatts_attr_db_t hid_gatt_db[IDX_HID_NB] =
     {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&GATTS_CHAR_UUID_HID_REPORT, ESP_GATT_PERM_READ,
                            HID_REPORT_MAX_LEN, 0, NULL}},
     [IDX_CHAR_CFG_HID_REPORT_XB]  =
-    {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&character_client_config_uuid, ESP_GATT_PERM_READ,
-                           sizeof(uint16_t), 0, NULL}},
+    {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&character_client_config_uuid, ESP_GATT_PERM_WRITE,
+                           sizeof(uint16_t), sizeof(notify_ccc), (uint8_t *)notify_ccc}},
     [IDX_CHAR_REP_HID_REPORT_XB]  =
     {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&hid_report_ref_descr_uuid, ESP_GATT_PERM_READ,
                            sizeof(hid_report_ref), sizeof(hid_report_ref), (uint8_t *)&hid_report_ref}},

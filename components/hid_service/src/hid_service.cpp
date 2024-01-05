@@ -331,12 +331,12 @@ static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_
     logger.debug("                           handle: {}, value len: {}", param->write.handle, param->write.len);
     if (!param->write.is_prep){
       bool is_cfg_handle =
-        hid_handle_table[IDX_CHAR_CFG_HID_REPORT_XB] == param->write.handle;
+        hid_handle_table[IDX_CHAR_CFG_HID_REPORT] == param->write.handle;
 
       if (is_cfg_handle && param->write.len == 2){
         logger.debug("Configuration of {}",
-                     param->write.handle == hid_handle_table[IDX_CHAR_CFG_HID_REPORT_XB]
-                     ? "IDX_CHAR_CFG_HID_REPORT_XB"
+                     param->write.handle == hid_handle_table[IDX_CHAR_CFG_HID_REPORT]
+                     ? "IDX_CHAR_CFG_HID_REPORT"
                      : "UNKNOWN CFG HANDLE");
         uint16_t descr_value = param->write.value[1]<<8 | param->write.value[0];
         if (descr_value == 0x0001) {
@@ -394,9 +394,6 @@ static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_
 
     //start sent the update connection parameters to the peer device.
     esp_ble_gap_update_conn_params(&conn_params);
-
-    // set the encryption
-    esp_ble_set_encryption(param->connect.remote_bda, ESP_BLE_SEC_ENCRYPT_NO_MITM);
 
     // only if the device is bonded, send the report map
     if (is_bonded(param->connect.remote_bda)) {
@@ -560,7 +557,7 @@ void hid_service_set_report_descriptor(uint8_t* descriptor, size_t descriptor_le
 
 void hid_service_send_input_report(const uint8_t* report, size_t report_len) {
   logger.info("Sending input report of length {}", report_len);
-  send_indicate((uint8_t*)report, report_len, hid_handle_table[IDX_CHAR_VAL_HID_REPORT_XB]);
+  send_indicate((uint8_t*)report, report_len, hid_handle_table[IDX_CHAR_VAL_HID_REPORT]);
 }
 
 void hid_service_set_battery_level(const uint8_t level) {

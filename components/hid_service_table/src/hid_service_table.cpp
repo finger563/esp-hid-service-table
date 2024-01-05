@@ -73,10 +73,6 @@ static const uint8_t hid_report_ref[] = {
   0x01, // report ID of the report that this reference refers to in the report descriptor
   0x01, // report type (1 = input, 2 = output, 3 = feature)
 };
-static const uint8_t hid_report_ref_feature[] = {
-  0x00, // report ID feature
-  0x03, // report type (1 = input, 2 = output, 3 = feature)
-};
 uint8_t *report_descriptor = NULL;
 size_t report_descriptor_len = 0;
 
@@ -123,7 +119,7 @@ const esp_gatts_attr_db_t hid_gatt_db[IDX_HID_NB] =
     {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&character_declaration_uuid, ESP_GATT_PERM_READ,
                            CHAR_DECLARATION_SIZE, CHAR_DECLARATION_SIZE, (uint8_t *)&char_prop_read}},
     [IDX_CHAR_VAL_HID_REPORT_MAP]  =
-    {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&GATTS_CHAR_UUID_HID_REPORT_MAP, ESP_GATT_PERM_READ,
+    {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&GATTS_CHAR_UUID_HID_REPORT_MAP, ESP_GATT_PERM_READ | ESP_GATT_PERM_READ_ENCRYPTED,
                            HID_REPORT_MAP_MAX_LEN, sizeof(report_descriptor), (uint8_t *)&report_descriptor}},
     [IDX_CHAR_EXT_HID_REPORT_MAP]  =
     {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&hid_report_map_ext_desc_uuid, ESP_GATT_PERM_READ,
@@ -139,31 +135,18 @@ const esp_gatts_attr_db_t hid_gatt_db[IDX_HID_NB] =
 
 
     /* Characteristic Declaration */
-    [IDX_CHAR_HID_REPORT_XB]      =
-    {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&character_declaration_uuid, ESP_GATT_PERM_READ,
-                           CHAR_DECLARATION_SIZE, CHAR_DECLARATION_SIZE, (uint8_t *)&char_prop_read_notify}},
-    [IDX_CHAR_VAL_HID_REPORT_XB]  =
-    {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&GATTS_CHAR_UUID_HID_REPORT, ESP_GATT_PERM_READ,
-                           HID_REPORT_MAX_LEN, 0, NULL}},
-    [IDX_CHAR_CFG_HID_REPORT_XB]  =
-    {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&character_client_config_uuid, ESP_GATT_PERM_WRITE,
-                           sizeof(uint16_t), sizeof(notify_ccc), (uint8_t *)notify_ccc}},
-    [IDX_CHAR_REP_HID_REPORT_XB]  =
-    {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&hid_report_ref_descr_uuid, ESP_GATT_PERM_READ,
-                           sizeof(hid_report_ref), sizeof(hid_report_ref), (uint8_t *)&hid_report_ref}},
-
-
-    /* Characteristic Declaration */
     [IDX_CHAR_HID_REPORT]      =
     {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&character_declaration_uuid, ESP_GATT_PERM_READ,
-                           CHAR_DECLARATION_SIZE, CHAR_DECLARATION_SIZE, (uint8_t *)&char_prop_read_write}},
+                           CHAR_DECLARATION_SIZE, CHAR_DECLARATION_SIZE, (uint8_t *)&char_prop_read_notify}},
     [IDX_CHAR_VAL_HID_REPORT]  =
-    {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&GATTS_CHAR_UUID_HID_REPORT, ESP_GATT_PERM_READ,
+    {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&GATTS_CHAR_UUID_HID_REPORT, ESP_GATT_PERM_READ | ESP_GATT_PERM_READ_ENCRYPTED,
                            HID_REPORT_MAX_LEN, 0, NULL}},
+    [IDX_CHAR_CFG_HID_REPORT]  =
+    {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&character_client_config_uuid, ESP_GATT_PERM_WRITE | ESP_GATT_PERM_WRITE_ENCRYPTED,
+                           sizeof(uint16_t), sizeof(notify_ccc), (uint8_t *)notify_ccc}},
     [IDX_CHAR_REP_HID_REPORT]  =
     {{ESP_GATT_AUTO_RSP}, {ESP_UUID_LEN_16, (uint8_t *)&hid_report_ref_descr_uuid, ESP_GATT_PERM_READ,
-                           sizeof(hid_report_ref_feature), sizeof(hid_report_ref_feature), (uint8_t *)hid_report_ref_feature}},
-
+                           sizeof(hid_report_ref), sizeof(hid_report_ref), (uint8_t *)&hid_report_ref}},
 
   };
 

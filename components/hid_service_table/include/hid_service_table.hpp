@@ -41,14 +41,9 @@ enum
     IDX_CHAR_VAL_HID_PROTOCOL_MODE,
 
     // HID Report characteristic, UUID: 0x2A4D, Properties: read, notify
-    IDX_CHAR_HID_REPORT_XB,
-    IDX_CHAR_VAL_HID_REPORT_XB,
-    IDX_CHAR_CFG_HID_REPORT_XB,
-    IDX_CHAR_REP_HID_REPORT_XB,
-
-    // HID Report characteristic, UUID: 0x2A4D, Properties: read, notify
     IDX_CHAR_HID_REPORT,
     IDX_CHAR_VAL_HID_REPORT,
+    IDX_CHAR_CFG_HID_REPORT,
     IDX_CHAR_REP_HID_REPORT,
 
     IDX_HID_NB,
